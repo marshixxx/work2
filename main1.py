@@ -82,10 +82,25 @@ def handle_message(event):
         vkinder = Vkinder(vk_token)
         user_info = vkinder.get_user_info(user['id'])
         if user_info:
-            users = vkinder.search_users(
-                user_info.get('city', {}).get('id'),
-                user_info.get('age', 0),
-                user_info.get('sex', 0)
+           db_user_id = db.get_db_id(user_id)
+        city = db.get_city(user_id)
+        sex = db.get_sex(user_id)
+        age_from = db.get_age_from(user_id)
+        age_to = db.get_age_to(user_id)
+        offset = db.get_offset(user_id)
+        response = requests.get(
+            'https://api.vk.com/method/users.search',
+            self.get_params({'count': 1,
+                             'offset': offset,
+                             'city': city,
+                             'country': 1,
+                             'sex': sex,
+                             'age_from': age_from,
+                             'age_to': age_to,
+                             'fields': 'is_closed',
+                             'status': 6,
+                             'has_photo': 1}
+                            )
             )
             if users:
                 for user in users:

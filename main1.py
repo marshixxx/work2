@@ -41,7 +41,7 @@ class Vkinder:
             print(f"Не удалось найти партнера для {user_id}: {response.json()['error']['error_msg']}")
             VkBot().write_msg(user_id, 'Ошибка с нашей стороны. Попробуйте позже.')
             db.update(user_id, db.UserPosition, position=1, offset=0)
-            retur
+            return
  
     def get_user_photos(self, user_id):
         photos = self.vk_api.photos.get(

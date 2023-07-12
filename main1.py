@@ -80,7 +80,7 @@ def handle_message(event):
     message = event.text.lower()
     if message == 'поиск':
         vkinder = Vkinder(vk_token)
-        user_info = vkinder.get_user_info(user_id)
+        user_info = vkinder.get_user_info(user['id'])
         if user_info:
             users = vkinder.search_users(
                 user_info.get('city', {}).get('id'),

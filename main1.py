@@ -37,11 +37,19 @@ class Vkinder:
             sex=sex,
             count=1000
         )
-        except:
-            print(f"Не удалось найти партнера для {user_id}: {response.json()['error']['error_msg']}")
-            VkBot().write_msg(user_id, 'Ошибка с нашей стороны. Попробуйте позже.')
-            db.update(user_id, db.UserPosition, position=1, offset=0)
-            return
+        response = requests.get(url, params=params).json()
+        try:
+            items = response['response']['items']
+            for person in items:
+                if not person.get('is_closed'):
+                    first_name = person.get('first_name')
+                    last_name = person.get('last_name')
+                    vk_id = str(person.get('id'))
+                    vk_link = f'vk.com/id{vk_id}'
+                    insert_data_users(first_name, last_name, vk_id, vk_link)
+            return 'Search completed'
+        except KeyError:
+            self.write_msg(user_id, ERROR_MESSAGE)
  
     def get_user_photos(self, user_id):
         photos = self.vk_api.photos.get(

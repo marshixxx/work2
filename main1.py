@@ -1,7 +1,15 @@
+import datetime
 from random import randrange
+from typing import Any, Dict, List, Optional, Tuple
+
+import requests
 import vk_api
-from vk_api.longpoll import VkLongPoll, VkEventType
-from database import *
+from vk_api.longpoll import VkEventType, VkLongPoll
+
+from database import insert_data_seen_users, insert_data_users, select
+from settings import (COUNTRY_ID, ERROR_MESSAGE, GROUP_TOKEN, MAX_CITY_RESULTS,
+                      MAX_PHOTOS, MAX_PHOTOS_COUNT, MAX_SEARCH_COUNT,
+                      URL_USERS_GET, USER_TOKEN, VK_API_VERSION)
  
 vk_token = "vk1.a.M6-dUrKpYL1cg11BOYqA-FFkgBe4c8XUC4qf34yyygfJrxapsVPHsfTwvFWZ_RIIbdDi1pLmoC1aFvbTuoIMN0M_lON-xXoLBK0OJMul8cf7ThX76q-bdEoHuHZSK5wOjX30u5hLHqxyO2kx9sTC6d9aZUSh8Y6NTsPsp5cdzY4sQAZNKAws-LIhbIJQejU9uP192w2ea2dY6OpDAKP3Ag"
  
@@ -58,15 +66,19 @@ class Vkinder:
             extended=1,
             count=3
         )
-        sorted_photos = sorted(
-            photos['items'],
-            key=lambda x: x['likes']['count'],
-            reverse=True
-        )
-        photo_links = []
-        for photo in sorted_photos:
-            photo_links.append(photo['sizes'][-1]['url'])
-        return photo_links
+       repl = requests.get(url, params=params)
+        photos = []
+        response = repl.json()
+        try:
+            items = response['response']['items']
+            for item in items:
+                likes = item['likes'].get('count', 0)
+                photo_id = item['id']
+                photos.append((likes, photo_id))
+            photos.sort(reverse=True)
+            return photos
+        except KeyError:
+            self.write_msg(user_id, ERROR_MESSAGE)
  
     def get_user_info(self, user_id):
         try:
